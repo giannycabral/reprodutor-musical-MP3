@@ -1,90 +1,32 @@
-class MusicPlayer {
-  constructor() {
-    this.currentTrackIndex = 0;
-    this.isPlaying = false;
-    this.playlist = [];
-
-    // Audio Context
-    this.audioContext = new (window.AudioContext ||
-      window.webkitAudioContext)();
-    this.analyser = this.audioContext.createAnalyser();
-    this.analyser.fftSize = 64;
-    this.audioElement = new Audio();
-
-    this.initializePlayer();
-    this.setupEventListeners();
-    this.setupAudioNodes();
-  }
-
-  setupAudioNodes() {
-    // Conectar os nós de áudio para o visualizador
-    this.source = this.audioContext.createMediaElementSource(this.audioElement);
-    this.source.connect(this.analyser);
-    this.analyser.connect(this.audioContext.destination);
+class MusicVisualizer {
+  constructor(audioContext, analyser, audioElement) {
+    this.audioContext = audioContext;
+    this.analyser = analyser;
+    this.audioElement = audioElement;
 
     // Configurar o array de dados para o visualizador
     this.dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+    this.setupEventListeners();
   }
 
-  async initializePlayer() {
-    try {
-      const response = await fetch("src/assets/playlist/songs.json");
-      const data = await response.json();
-      this.playlist = data.playlist;
-      this.loadTrack(this.currentTrackIndex);
-    } catch (error) {
-      console.error("Erro ao carregar playlist:", error);
-    }
-  }
   setupEventListeners() {
-    // Controles de Player com suporte a toque
-    const addTouchAndClickEvent = (elementId, handler) => {
-      const element = document.getElementById(elementId);
-      if (element) {
-        element.addEventListener("click", handler);
-        element.addEventListener("touchstart", (e) => {
-          e.preventDefault();
-          handler();
-        });
-      }
-    };
-
-    addTouchAndClickEvent("play-btn", () => this.togglePlay());
-    addTouchAndClickEvent("prev-btn", () => this.previousTrack());
-    addTouchAndClickEvent("next-btn", () => this.nextTrack());
-
-    // Controle de Volume otimizado para toque
-    const volumeControl = document.getElementById("volume-control");
-    if (volumeControl) {
-      const volumeHandler = (e) => {
-        e.preventDefault();
-        const value = e.target.value;
-        this.audioElement.volume = value;
-        volumeControl.style.setProperty("--volume", `${value * 100}%`);
-      };
-      volumeControl.addEventListener("input", volumeHandler);
-      volumeControl.addEventListener("touchmove", volumeHandler);
-    }
-
-    // Progress Bar otimizada para toque
-    const seekSlider = document.getElementById("seek-slider");
-    if (seekSlider) {
-      const seekHandler = (e) => {
-        e.preventDefault();
-        const time = (this.audioElement.duration * e.target.value) / 100;
-        this.audioElement.currentTime = time;
-      };
-      seekSlider.addEventListener("input", seekHandler);
-      seekSlider.addEventListener("touchmove", seekHandler);
-    }
-
-    // Atualizações de Audio
-    this.audioElement.addEventListener("timeupdate", () =>
-      this.updateProgress()
-    );
-    this.audioElement.addEventListener("ended", () => this.nextTrack());
+    // Monitorar eventos de áudio para atualização do visualizador
+    requestAnimationFrame(() => this.updateVisualizer());
   }
-  loadTrack(index) {
+
+  updateVisualizer() {
+    // Obter dados de frequência
+    this.analyser.getByteFrequencyData(this.dataArray);
+
+    // Atualizar visualização aqui
+    // TODO: Implementar visualização conforme necessário
+
+    // Continuar atualizando
+    requestAnimationFrame(() => this.updateVisualizer());
+  }
+
+  // Método para desenhar o visualizador
+  drawVisualizer() {
     const track = this.playlist[index];
     if (!track) {
       console.error("Track não encontrada no índice:", index);
@@ -131,52 +73,54 @@ class MusicPlayer {
       lcdTrackName.classList.add("animate");
     } else {
       lcdTrackName.classList.remove("animate");
-    }
-
-    // Atualizar o visualizador
-    if (!this.visualizerStarted) {
+    } // Atualizar o visualizador (temporariamente desativado para debug)
+    /*if (!this.visualizerStarted) {
       this.startVisualizer();
       this.visualizerStarted = true;
-    }
+    }*/
   }
-  togglePlay() {
-    if (this.audioElement.paused) {
-      this.audioElement.play();
-      document.getElementById("play-btn").textContent = "⏸️";
-      document.querySelector(".play-led").classList.add("active");
-      if (this.audioContext.state === "suspended") {
-        this.audioContext.resume();
+  async togglePlay() {
+    try {
+      if (this.audioElement.paused) {
+        await this.audioElement.play();
+        const playBtn = document.getElementById("play-btn");
+        if (playBtn) playBtn.textContent = "⏸️";
+        if (this.audioContext.state === "suspended") {
+          await this.audioContext.resume();
+        }
+      } else {
+        this.audioElement.pause();
+        const playBtn = document.getElementById("play-btn");
+        if (playBtn) playBtn.textContent = "▶️";
       }
-    } else {
-      this.audioElement.pause();
-      document.getElementById("play-btn").textContent = "▶️";
-      document.querySelector(".play-led").classList.remove("active");
+    } catch (error) {
+      console.error("Erro ao alternar reprodução:", error);
     }
   }
-  nextTrack() {
-    const nextLed = document.querySelector(
-      ".button-group:last-child .led-indicator"
-    );
-    nextLed.classList.add("active");
-    setTimeout(() => nextLed.classList.remove("active"), 300);
-
-    this.currentTrackIndex =
-      (this.currentTrackIndex + 1) % this.playlist.length;
-    this.loadTrack(this.currentTrackIndex);
-    if (this.isPlaying) this.audioElement.play();
+  async nextTrack() {
+    try {
+      this.currentTrackIndex =
+        (this.currentTrackIndex + 1) % this.playlist.length;
+      await this.loadTrack(this.currentTrackIndex);
+      if (this.isPlaying) {
+        await this.audioElement.play();
+      }
+    } catch (error) {
+      console.error("Erro ao avançar para próxima faixa:", error);
+    }
   }
-  previousTrack() {
-    const prevLed = document.querySelector(
-      ".button-group:first-child .led-indicator"
-    );
-    prevLed.classList.add("active");
-    setTimeout(() => prevLed.classList.remove("active"), 300);
-
-    this.currentTrackIndex =
-      (this.currentTrackIndex - 1 + this.playlist.length) %
-      this.playlist.length;
-    this.loadTrack(this.currentTrackIndex);
-    if (this.isPlaying) this.audioElement.play();
+  async previousTrack() {
+    try {
+      this.currentTrackIndex =
+        (this.currentTrackIndex - 1 + this.playlist.length) %
+        this.playlist.length;
+      await this.loadTrack(this.currentTrackIndex);
+      if (this.isPlaying) {
+        await this.audioElement.play();
+      }
+    } catch (error) {
+      console.error("Erro ao voltar para faixa anterior:", error);
+    }
   }
   updateProgress() {
     const progress =

@@ -1,11 +1,24 @@
+// Configuração do visualizador
 const barCount = 32;
 let smoothedBars = new Float32Array(barCount);
-const smoothingFactor = 0.3;
+const smoothingFactor = 0.5; // Suavização das barras
+let isVisualizerActive = false;
+let animationFrameId = null;
+let lastUpdate = 0;
+const updateInterval = 1000 / 30; // 30 FPS para melhor performance
 
+// Inicialização das barras do visualizador
 function initVisualizer() {
+  console.log("Iniciando visualizador...");
   const visualizer = document.getElementById("visualizer");
+  if (!visualizer) {
+    console.warn("Elemento visualizer não encontrado");
+    return;
+  }
+
   visualizer.innerHTML = "";
 
+  // Criar barras com espaçamento e estilo inicial
   for (let i = 0; i < barCount; i++) {
     const bar = document.createElement("div");
     bar.className = "visualizer-bar";
@@ -15,18 +28,70 @@ function initVisualizer() {
   }
 
   smoothedBars.fill(0);
+  console.log("Visualizador inicializado");
 }
 
+// Controle de início do visualizador
+function startVisualizer() {
+  console.log("Iniciando animação do visualizador");
+  if (!isVisualizerActive) {
+    isVisualizerActive = true;
+    updateVisualizer();
+  }
+}
+
+// Controle de parada do visualizador
+function stopVisualizer() {
+  console.log("Parando visualizador");
+  isVisualizerActive = false;
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId);
+    animationFrameId = null;
+  }
+
+  // Resetar todas as barras para altura mínima
+  const bars = document.querySelectorAll(".visualizer-bar");
+  bars.forEach((bar) => {
+    bar.style.height = "2px";
+    bar.style.background = "var(--primary-color)";
+    bar.style.boxShadow = "none";
+  });
+}
+
+// Atualização do visualizador
 function updateVisualizer() {
-  // Aguardar até que o AudioContext esteja disponível
-  if (!window.audioContext || !window.analyser) {
-    requestAnimationFrame(updateVisualizer);
+  if (!isVisualizerActive) return;
+
+  const now = performance.now();
+  if (now - lastUpdate < updateInterval) {
+    animationFrameId = requestAnimationFrame(updateVisualizer);
+    return;
+  }
+  lastUpdate = now;
+
+  // Verificar se temos um player válido com contexto de áudio
+  const player = window.player;
+  if (!player?.audioContext || !player?.analyser || !player.audioElement) {
+    console.log("Aguardando inicialização completa do player...");
+    animationFrameId = requestAnimationFrame(updateVisualizer);
     return;
   }
 
-  const bufferLength = window.analyser.frequencyBinCount;
+  // Garantir que o contexto de áudio está em execução
+  if (player.audioContext.state !== "running") {
+    console.log("Resumindo contexto de áudio...");
+    player.audioContext.resume();
+  }
+
+  // Verificar se o áudio está realmente tocando
+  if (player.audioElement.paused || player.audioElement.ended) {
+    stopVisualizer();
+    return;
+  }
+
+  const bufferLength = player.analyser.frequencyBinCount;
   const dataArray = new Uint8Array(bufferLength);
-  window.analyser.getByteFrequencyData(dataArray);
+  player.analyser.getByteFrequencyData(dataArray);
 
   const bars = document.querySelectorAll(".visualizer-bar");
   const step = Math.floor(bufferLength / barCount);
@@ -43,7 +108,8 @@ function updateVisualizer() {
     const value = average / 255.0;
 
     // Aplicar suavização
-    smoothedBars[i] += (value - smoothedBars[i]) * smoothingFactor;
+    smoothedBars[i] =
+      smoothedBars[i] * (1 - smoothingFactor) + value * smoothingFactor;
     const height = smoothedBars[i] * 100;
 
     // Atualizar altura da barra
@@ -65,16 +131,60 @@ function updateVisualizer() {
     })`;
   }
 
-  requestAnimationFrame(updateVisualizer);
+  animationFrameId = requestAnimationFrame(updateVisualizer);
 }
 
-// Inicializar o visualizador
-window.addEventListener("DOMContentLoaded", () => {
-  // Garantir que as barras sejam criadas
+// Inicialização e eventos
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("DOM carregado, configurando visualizador...");
+
+  // Inicializar visualizador
   initVisualizer();
 
-  // Aguardar um momento para garantir que o AudioContext esteja pronto
-  setTimeout(() => {
-    updateVisualizer();
-  }, 100);
+  // Monitorar eventos de reprodução
+  document.addEventListener(
+    "play",
+    (e) => {
+      console.log("Evento play detectado");
+      if (e.target === window.player?.audioElement) {
+        startVisualizer();
+      }
+    },
+    true
+  );
+
+  document.addEventListener(
+    "pause",
+    (e) => {
+      console.log("Evento pause detectado");
+      if (e.target === window.player?.audioElement) {
+        stopVisualizer();
+      }
+    },
+    true
+  );
+
+  document.addEventListener(
+    "ended",
+    (e) => {
+      console.log("Evento ended detectado");
+      if (e.target === window.player?.audioElement) {
+        stopVisualizer();
+      }
+    },
+    true
+  );
+
+  // Verificar se já existe uma música tocando
+  const checkAndStartVisualizer = () => {
+    if (window.player?.audioElement && !window.player.audioElement.paused) {
+      if (window.player.audioContext && window.player.analyser) {
+        startVisualizer();
+      } else {
+        setTimeout(checkAndStartVisualizer, 100);
+      }
+    }
+  };
+
+  checkAndStartVisualizer();
 });

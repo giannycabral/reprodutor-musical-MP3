@@ -14,6 +14,8 @@
     /* Tamanho dos quadrados do xadrez */
     --checkerboard-color: rgba(255, 105, 180, 0.03);
     /* Cor rosa bem suave */
+    --focus-outline: 3px solid #FF1493;
+    --focus-ring-color: rgba(255, 20, 147, 0.5);
 }
 
 /* Reset e estilos base */
@@ -353,6 +355,7 @@ body::after {
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.1s;
+    outline: none;
 }
 
 .control-btn:hover {
@@ -363,6 +366,35 @@ body::after {
 .control-btn:active {
     transform: scale(0.95) translateY(0);
     box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+.control-btn:focus-visible::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: var(--focus-outline);
+    border-radius: inherit;
+    animation: focusRing 2s ease-in-out infinite;
+}
+
+@keyframes focusRing {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 /* Ajuste do espaçamento dos controles */
@@ -867,6 +899,7 @@ body::after {
     position: relative;
     transform-style: preserve-3d;
     transition: transform 0.1s;
+    outline: none;
 }
 
 .pixel-border {
@@ -912,7 +945,6 @@ body::after {
             rgba(255, 255, 255, 0.3));
     animation: scanline 2s linear infinite;
     pointer-events: none;
-    opacity: 0.5;
 }
 
 /* Estilo Pixel Art para o Container */
@@ -1052,13 +1084,10 @@ body::after {
 }
 
 .credit-item a {
-    color: var(--primary-color);
-    text-decoration: none;
-    transition: color 0.2s ease;
-}
-
-.credit-item a:hover {
-    color: var(--accent-color);
+    color: #FF1493;
+    /* Cor mais contrastante */
+    text-decoration: underline;
+    /* Melhor indicação visual */
 }
 
 .developer-credit {
@@ -1182,4 +1211,78 @@ body::after {
     .developer-credit p {
         font-size: 0.75rem;
     }
+}
+
+/* Melhorias de acessibilidade */
+:root {
+    --primary-color: #FF69B4;
+    --secondary-color: #FFB6C1;
+    --accent-color: #FF1493;
+    --text-color: #FFF;
+    --background-color: #1a1a1a;
+    --focus-outline: 3px solid #FF1493;
+    --focus-ring-color: rgba(255, 20, 147, 0.5);
+    --pixel-border: 4px;
+    --pixel-shadow: -2px -2px 0 #111, 2px 2px 0 #fff;
+    --checkerboard-size: 20px;
+    --checkerboard-color: rgba(255, 105, 180, 0.03);
+}
+
+/* Melhor indicação de foco */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: var(--focus-outline);
+    outline-offset: 2px;
+    box-shadow: 0 0 0 4px var(--focus-ring-color);
+}
+
+/* Melhorar contraste */
+.credit-item a {
+    color: #FF1493;
+    text-decoration: underline;
+}
+
+.control-btn:focus-visible::after {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: -4px;
+    right: -4px;
+    bottom: -4px;
+    border: var(--focus-outline);
+    border-radius: inherit;
+    animation: focusRing 2s ease-in-out infinite;
+}
+
+@keyframes focusRing {
+    0% {
+        transform: scale(1);
+        opacity: 1;
+    }
+
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+/* Otimização de performance */
+.visualizer-container-bottom,
+.retro-corner::after {
+    will-change: transform;
+    transform: translateZ(0);
+    backface-visibility: hidden;
+}
+
+/* Reduzir impacto de pseudo-elementos */
+body::before,
+body::after {
+    pointer-events: none;
+    z-index: -1;
 }
