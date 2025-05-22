@@ -1,0 +1,22 @@
+{
+  "playlist": [
+    {
+      "title": "Lofi Study Beat",
+      "artist": "ChillHop Music",
+      "url": "src/assets/playlist/tracks/lofi-study-beat.mp3",
+      "artwork": "src/assets/playlist/covers/lofi-study-beat.jpg"
+    },
+    {
+      "title": "Calm Piano",
+      "artist": "Study Music",
+      "url": "src/assets/playlist/tracks/calm-piano.mp3",
+      "artwork": "src/assets/playlist/covers/calm-piano.jpg"
+    },
+    {
+      "title": "Nature Sounds",
+      "artist": "Ambient Music",
+      "url": "src/assets/playlist/tracks/nature-sounds.mp3",
+      "artwork": "src/assets/playlist/covers/nature-sounds.jpg"
+    }
+  ]
+}

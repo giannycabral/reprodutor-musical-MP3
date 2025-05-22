@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1a1a1a">
+    <meta name="msapplication-navbutton-color" content="#1a1a1a">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>MP3 Player Art</title>
+    <link rel="stylesheet" href="src/css/main.css">
+</head>
+
+<body>
+    <div class="container">
+        <!-- Main Visualizer Container -->
+        <div class="visualizer-container">
+            <div class="retro-corner top-left"></div>
+            <div class="retro-corner top-right"></div>
+            <div class="retro-corner bottom-left"></div>
+            <div class="retro-corner bottom-right"></div>
+            <!-- Kawaii Cat Header -->
+            <div class="header">
+                <!-- Elementos Decorativos Retro -->
+                <div class="retro-circles">
+                    <div class="circle"></div>
+                    <div class="circle"></div>
+                    <div class="circle"></div>
+                </div>
+                <h1 class="title">
+                    <span class="kawaii-text">♪ Mp3 Music ♪</span>
+                </h1>
+                <!-- Display LCD -->
+                <div class="lcd-display">
+                    <div class="lcd-screen">
+                        <div class="lcd-text">
+                            <div class="track-scroll" id="lcd-track-name"></div>
+                            <div class="track-time">
+                                <span id="lcd-current-time">00:00</span>
+                                <span>/</span>
+                                <span id="lcd-duration">00:00</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Playlist Container -->
+            <div class="playlist-container">
+                <div class="now-playing">
+                    <img id="track-artwork" src="src/assets/playlist/covers/default-cover.jpg" alt="Capa do álbum">
+                    <div class="track-info">
+                        <h3 id="track-name">Selecione uma música</h3>
+                        <p id="track-artist">Artista</p>
+                    </div>
+                </div>
+
+                <div class="player-controls">
+                    <div class="control-buttons">
+                        <div class="button-group">
+                            <div class="led-indicator"></div>
+                            <button id="prev-btn" class="control-btn" aria-label="Música anterior">⏮️</button>
+                        </div>
+                        <div class="button-group">
+                            <div class="led-indicator play-led"></div>
+                            <button id="play-btn" class="control-btn" aria-label="Reproduzir/Pausar">▶️</button>
+                        </div>
+                        <div class="button-group">
+                            <div class="led-indicator"></div>
+                            <button id="next-btn" class="control-btn" aria-label="Próxima música">⏭️</button>
+                        </div>
+                    </div>
+                    <div class="controls-wrapper">
+                        <div class="volume-control" role="group" aria-label="Controle de volume">
+                            <label for="volume-control" class="visually-hidden">Volume</label>
+                            <div class="volume-icon" aria-label="Ícone de volume" role="button" tabindex="0"
+                                title="Clique para alternar mudo">
+                                <svg viewBox="0 0 24 24" class="volume-icon-svg" aria-hidden="true">
+                                    <path
+                                        d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+                                </svg>
+                            </div>
+                            <input type="range" id="volume-control" min="0" max="1" step="0.01" value="0.7"
+                                aria-label="Ajustar volume" title="Arraste para ajustar o volume"
+                                data-tooltip="Volume: 70%">
+                        </div>
+                    </div>
+                </div>
+            </div> <!-- Visualizer Display -->
+            <div class="visualizer-container-bottom">
+                <div id="visualizer" class="visualizer-display">
+                    <!-- Barras do visualizador serão adicionadas via JavaScript -->
+                </div>
+                <div class="visualizer-reflection"></div>
+            </div>
+        </div> <!-- Dancing Characters -->
+        <div class="dancers">
+            <!-- Mantido os mesmos SVGs dos personagens dançantes -->
+        </div>
+    </div>
+
+    <!-- Footer com créditos -->
+    <footer class="pixel-footer">
+        <img src="src/assets/gifs/cat-dance.gif" alt="Dancing Cat" class="footer-gif footer-gif-left">
+        <div class="credits-container">
+            <h3 class="credits-title">♪ Créditos Musicais ♪</h3>
+            <div class="credits-list">
+                <p class="credit-item">
+                    Music by <a
+                        href="https://pixabay.com/pt/users/lofidreams99-25132446/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=340019">kaveesha
+                        Senanayake</a> from <a
+                        href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=340019">Pixabay</a>
+                </p>
+                <p class="credit-item">
+                    Music by <a
+                        href="https://pixabay.com/pt/users/clavier-music-16027823/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=341043">Clavier
+                        Clavier</a> from <a
+                        href="https://pixabay.com//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=341043">Pixabay</a>
+                </p>
+                <p class="credit-item">
+                    Music by <a
+                        href="https://pixabay.com/pt/users/ribhavagrawal-39286533/?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=284494">Ribhav
+                        Agrawal</a> from <a
+                        href="https://pixabay.com/music//?utm_source=link-attribution&utm_medium=referral&utm_campaign=music&utm_content=284494">Pixabay</a>
+                </p>
+            </div>
+            <div class="developer-credit">
+                <p>Desenvolvido com ♥ por Regiane Cabral</p>
+                <p class="year">© 2025</p>
+            </div>
+        </div>
+        <img src="src/assets/gifs/bunny-dance.gif" alt="Dancing Bunny" class="footer-gif footer-gif-right">
+    </footer>
+
+    <script src="src/js/playlist.js"></script>
+    <script src="src/js/audio.js"></script>
+    <script src="src/js/visualizer.js"></script>
+    <script src="src/js/background.js"></script>
+</body>
+
+</html>
