@@ -22,7 +22,7 @@ Um player de música retrô com estilo kawaii e pixel art, oferecendo uma experi
 
 1. Clone o repositório:
 \`\`\`bash
-git clone https://github.com/seu-usuario/reprodutor-musical.git
+git clone https://github.com/giannycabral/reprodutor-musical-MP3.git
 \`\`\`
 
 2. Abra o arquivo \`index.html\` em seu navegador ou use um servidor local.
